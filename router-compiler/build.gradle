@@ -1,0 +1,82 @@
+apply plugin: 'java'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.squareup:javapoet:1.7.0'
+    compile 'com.google.auto.service:auto-service:1.0-rc2'
+//    compile project(':router-annotation')
+    compile 'com.silencedut:router-annotation:1.0.0'
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+version = "1.0.0"
+
+def siteUrl = 'https://github.com/SilenceDut/Router'
+def gitUrl = 'git@github.com:SilenceDut/Router.git'
+group = "com.silencedut"
+install {
+    repositories.mavenInstaller {
+
+        pom {
+            project {
+                packaging 'jar'
+                name 'Router'
+                url siteUrl
+                description = 'router compiler ahead of runtime'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'silencedut'
+                        name 'SilenceDut'
+                        email 'silencedutchman@foxmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = "router-compiler"    //发布到JCenter上的项目名字
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}
+
